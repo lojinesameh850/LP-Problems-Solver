@@ -38,14 +38,23 @@ def simplex(c, A, b, optimalityCondition, urVariables=[]):
 
     # Create tableau
     tableau = np.hstack([A, np.eye(constraints), b.reshape(-1, 1)])
-    c = np.hstack([c, np.zeros(constraints + 1)]) 
+    
+    
+    # c = np.hstack([c, np.zeros(constraints + 1)]) 
+    num_slack = constraints  # Number of slack variables
+    num_extra = tableau.shape[1] - len(c)  # Difference in columns
+
+    c = np.hstack([c, np.zeros(num_extra)])  # Ensure c has the correct length
+
+    
+    
     if(optimalityCondition == "minimize"):
         tableau = np.vstack([tableau, c])
     else:
         tableau = np.vstack([tableau, -1 * c])
 
-    # print("Initial Tableau:")
-    # print(tableau)
+    print("Initial Tableau:")
+    print(tableau)
 
     # Simplex algorithm
     while True:
@@ -66,9 +75,9 @@ def simplex(c, A, b, optimalityCondition, urVariables=[]):
         ratios[ratios <= TOL] = np.inf 
         pivotRow = np.argmin(ratios)
 
-        # print("Pivot Column:", pivotCol)
-        # print("Pivot Row:", pivotRow)
-        # print("Pivot Element:", tableau[pivotRow, pivotCol])
+        print("Pivot Column:", pivotCol)
+        print("Pivot Row:", pivotRow)
+        print("Pivot Element:", tableau[pivotRow, pivotCol])
 
         # Pivot operation
         pivot = tableau[pivotRow, pivotCol]
@@ -77,8 +86,8 @@ def simplex(c, A, b, optimalityCondition, urVariables=[]):
             if i != pivotRow:
                 tableau[i, :] -= tableau[i, pivotCol] * tableau[pivotRow, :]
 
-        # print("Updated Tableau:")
-        # print(tableau)
+        print("Updated Tableau:")
+        print(tableau)
 
     # Solution
     solution = np.zeros(numOfVars)
@@ -100,7 +109,7 @@ def simplex(c, A, b, optimalityCondition, urVariables=[]):
     
     return solution, objectiveValue
 
-# Test Case
+# # Test Case
 # c = [-1, -1]
 # A = [[2, 3], [-3, 2], [3, -5]]
 # b = [12, -4, 2]
