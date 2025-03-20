@@ -1,17 +1,23 @@
 import React, { useState } from "react";
-import { Textarea, Select, Option, Button } from "@mui/joy";
+import { Textarea, Option, Button } from "@mui/joy";
+import { FaLessThanEqual, FaGreaterThanEqual, FaEquals } from "react-icons/fa6";
+import { Select, MenuItem } from "@mui/material";
 
 const LinearProgrammingModel = () => {
   const [numVars, setNumVars] = useState(2);
   const [numConstraints, setNumConstraints] = useState(2);
   const [matrix, setMatrix] = useState([]);
+  const [types, setTypes] = useState([]);
+  const [RHS, setRHS] = useState([]);
 
   const handleGenerate = () => {
     setMatrix(
       Array.from({ length: numConstraints }, () =>
-        Array.from({ length: numVars }, () => "")
+        Array.from({ length: numVars }, () => '0')
       )
     );
+    setRHS(Array.from({ length: numConstraints }, () => '0'));
+    setTypes(Array.from({ length: numConstraints }, () => "<="));
   };
 
   const handleChange = (row, col, value) => {
@@ -19,6 +25,29 @@ const LinearProgrammingModel = () => {
       rowIndex === row ? r.map((c, colIndex) => (colIndex === col ? value : c)) : r
     );
     setMatrix(newMatrix);
+  };
+
+  const handleSolve = async () => {
+    const data = {
+      matrix: matrix,
+      RHS: RHS,
+      types: types
+    };
+  
+    try {
+      const response = await fetch("http://127.0.0.1:5000/solveLP", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+  
+      const result = await response.json();
+      console.log("Backend Response:", result);
+    } catch (error) {
+      console.error("Error sending data:", error);
+    }
   };
 
   return (
@@ -39,7 +68,7 @@ const LinearProgrammingModel = () => {
 
       {/* Constraints */}
       <div className="flex items-center gap-4">
-        <h2 className="text-lg font-semibold">Number of Decision Variables</h2>
+        <h2 className="text-lg font-semibold">Number of Constraints</h2>
         <Textarea
           type="number"
           variant="outlined"
@@ -53,9 +82,9 @@ const LinearProgrammingModel = () => {
       {/* Objective */}
       <div className="flex items-center gap-4">
         <h3 className="text-lg font-semibold">Objective</h3>
-        <Select defaultValue="min" onChange={handleChange} sx={{ width: "150px", height: "10px" }}>
-          <Option value="min">Minimize</Option>
-          <Option value="max">Maximize</Option>
+        <Select defaultValue="min" onChange={handleChange} sx={{ width: "150px", height: "35px" }}>
+          <MenuItem value="min">Minimize</MenuItem>
+          <MenuItem value="max">Maximize</MenuItem>
         </Select>
       </div>
 
@@ -67,8 +96,9 @@ const LinearProgrammingModel = () => {
 
       {matrix.length > 0 && (
         <>
-          <h3>Objective Function:</h3>
+          <h3>Objective Function: </h3>
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <p>Z =</p>
             {Array.from({ length: numVars }).map((_, index) => (
               <Textarea
                 key={index}
@@ -80,7 +110,7 @@ const LinearProgrammingModel = () => {
             ))}
           </div>
 
-          <h3>Constraints</h3>
+          <h3>Constraints: </h3>
           {matrix.map((row, rowIndex) => (
             <div key={rowIndex} style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
               {row.map((_, colIndex) => (
@@ -93,11 +123,35 @@ const LinearProgrammingModel = () => {
                   onChange={(e) => handleChange(rowIndex, colIndex, e.target.value)}
                 />
               ))}
+              <div className="flex items-center gap-4">
+                <Select placeholder="Type" defaultValue="<="  value={types[rowIndex] || "<="}  
+                onChange={(e) => {
+                  const newTypes = [...types];
+                  newTypes[rowIndex] = e.target.value;
+                  setTypes(newTypes);
+                }} sx={{ width: "80px", height: "auto" }}>
+                  <MenuItem value='<='><FaLessThanEqual /></MenuItem>
+                  <MenuItem value='>='><FaGreaterThanEqual /></MenuItem>
+                  <MenuItem value='='><FaEquals /></MenuItem>
+                </Select>
+              </div>
+              <Textarea
+                size="small"
+                variant="outlined"
+                placeholder="RHS"
+                sx={{ width: "60px" }}
+                onChange={(e) => {
+                  const newRHS = [...RHS];
+                  newRHS[rowIndex] = e.target.value;
+                  setRHS(newRHS);
+                }}
+              />
+              
             </div>
           ))}
         </>
       )}
-      {matrix.length > 0 && (
+      {/*{matrix.length > 0 && (
         <>
           <h3>Objective Function:</h3>
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
@@ -128,6 +182,9 @@ const LinearProgrammingModel = () => {
             </div>
           ))}
         </>
+      )}*/}
+      {matrix.length > 0 && (
+      <Button variant="contained" color="primary" onClick={handleSolve}><h3>Solve</h3></Button>
       )}
     </div>
   );
