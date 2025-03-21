@@ -5,6 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from flask import jsonify
 import numpy
+from .SecondPreemptive import *
 from .bigM import formulateConstraints , simplex
 from .TwoPhase import  Secondarysimplex , TwoPhasesimplex , formulateTwoPhase
 # Create your views here.
@@ -17,11 +18,11 @@ class Solver(View):
         print(data)  # Debugging output
         # Extract data
         operation = data.get('operation')
-        objective = data.get('objective')
-        constraints = data.get('constraints')
-        objective_type = data.get('operation_type')
-        unrestricted_vars = data.get('unrestricted_vars')
         if operation in {1,2}:
+            objective = data.get('objective')
+            constraints = data.get('constraints')
+            objective_type = data.get('operation_type')
+            unrestricted_vars = data.get('unrestricted_vars')
             constraints , objective , var_names , M = formulateConstraints(objective,objective_type,constraints,unrestricted_vars.copy())
             steps , basic_vars = simplex(objective,constraints,var_names,M)
             print(type(steps))
@@ -66,6 +67,10 @@ class Solver(View):
                     "basic_vars": basic_vars
                 })
         elif operation == 3:
+            objective = data.get('objective')
+            constraints = data.get('constraints')
+            objective_type = data.get('operation_type')
+            unrestricted_vars = data.get('unrestricted_vars')
             Finalobjective = objective
             constraints , objective , var_names = formulateTwoPhase(constraints,unrestricted_vars.copy())
             for i in unrestricted_vars:
@@ -137,6 +142,19 @@ class Solver(View):
                     "steps" : solution,
                     "basic_Vars" : basic_vars
                 })
+        elif operation == 4:
+            goals = data.get("goals")
+            unrestricted_vars = data.get("unrestricted_vars")
+            goals , var_names , satisfier = FormulatePreemptive(goals,unrestricted_vars.copy())
+            basic_vars , var_names , list = solvePreemtpive(goals,var_names,satisfier)
+            return JsonResponse(
+                {
+                    "steps" : list,
+                    "var_names" : var_names,
+                    "basic_vars" : basic_vars
+                }
+            )
+            
 
 
     
