@@ -90,6 +90,7 @@ def simplex(objective, constraints, var_names,M):
     # Pivot Row Identification Fix
     while np.any(tableau[0,:-1] < 0):
         print(tableau)
+        sleep(1)
         pivotCol = np.argmin(tableau[0, :-1])
 
         # Correct ratio calculation for unrestricted variables
@@ -97,7 +98,7 @@ def simplex(objective, constraints, var_names,M):
         valid_ratios = np.where(ratios > 0, ratios, np.inf)
         if np.all(valid_ratios == np.inf):
             print("Unbounded")
-            return steps , "unbounded"
+            exit()
         pivotRow = np.argmin(valid_ratios) + 1  # Adjust for offset
 
         # Handle artificial variable removal
@@ -129,18 +130,18 @@ def simplex(objective, constraints, var_names,M):
         f.write(str(steps))
     print(basic_vars)
     return steps, basic_vars
-# if __name__ == '__main__':
-#     objective = [5,-4,6,-8]
-#     objective_type = 'max'
-#     constraints = [[1,2,2,4,'<=',40],[2,-1,1,2,'<=',8],[4,-2,1,-1,'<=',10]]
-#     unrestricted_vars = []
-#     constraints, objective, var_names, M = formulateConstraints(objective, objective_type, constraints,unrestricted_vars.copy())
-#     steps , basic_vars = simplex(objective, constraints, var_names,M)
-#     steps = np.array(steps)  # Add this before the loop
-#     print(steps[-1])
-#     print("Objective Value:", steps[-1, 0, -1])
-#     for var, val in zip(basic_vars, steps[-1, 1:]):
-#         factor = 1
-#         # if var.endswith('s'):
-#         #     factor = -1
-#         print(f"{var}: {factor * val[-1]}")
+if __name__ == '__main__':
+    objective = [5,-4,6,-8]
+    objective_type = 'max'
+    constraints = [[1,2,2,4,'<=',40],[2,-1,1,2,'<=',8],[4,-2,1,-1,'<=',10]]
+    unrestricted_vars = []
+    constraints, objective, var_names, M = formulateConstraints(objective, objective_type, constraints,unrestricted_vars.copy())
+    steps , basic_vars = simplex(objective, constraints, var_names,M)
+    steps = np.array(steps)  # Add this before the loop
+    print(steps[-1])
+    print("Objective Value:", steps[-1, 0, -1])
+    for var, val in zip(basic_vars, steps[-1, 1:]):
+        factor = 1
+        # if var.endswith('s'):
+        #     factor = -1
+        print(f"{var}: {factor * val[-1]}")
