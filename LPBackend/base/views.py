@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from flask import jsonify
 import numpy
 from .bigM import formulateConstraints , simplex
+from .TwoPhase import  Secondarysimplex , TwoPhasesimplex , formulateTwoPhase
 # Create your views here.
 @method_decorator(csrf_exempt, name='dispatch')
 class Solver(View):
@@ -20,12 +21,13 @@ class Solver(View):
         constraints = data.get('constraints')
         objective_type = data.get('operation_type')
         unrestricted_vars = data.get('unrestricted_vars')
-        if operation == 2:
+        if operation in {1,2}:
             constraints , objective , var_names , M = formulateConstraints(objective,objective_type,constraints,unrestricted_vars.copy())
             steps , basic_vars = simplex(objective,constraints,var_names,M)
             print(type(steps))
             print(type(basic_vars))
             if isinstance(basic_vars, str):
+                print("here")
                 if isinstance(steps, numpy.ndarray):
                     steps = steps.tolist()
                 if isinstance(basic_vars, numpy.ndarray):
@@ -63,4 +65,78 @@ class Solver(View):
                     "steps": steps,
                     "basic_vars": basic_vars
                 })
+        elif operation == 3:
+            Finalobjective = objective
+            constraints , objective , var_names = formulateTwoPhase(constraints,unrestricted_vars.copy())
+            for i in unrestricted_vars:
+                Finalobjective[i] = Finalobjective[i] * -1
+                Finalobjective.insert(i, -1 * Finalobjective[i])
+                for j in range(0,len(unrestricted_vars)):
+                    unrestricted_vars[j] += 1
+            steps , basic_vars , var_names = TwoPhasesimplex(objective,constraints,var_names)
+            if isinstance(basic_vars,str):
+                if isinstance(steps,numpy.ndarray):
+                    steps = steps.tolist()
+                if isinstance(steps,list):
+                    new_steps = []
+                    for item in steps:
+                        if isinstance(item, numpy.ndarray):
+                            new_steps.append(item.tolist())
+                        else:
+                            new_steps.append(item)
+                    steps = new_steps
+                return JsonResponse({
+                    "steps" : steps,
+                    "Error" : "unbounded"
+                })
+            final_tableau = steps[-1]
+            artificial_indices = [i for i, name in enumerate(var_names) if name.startswith('a')]
+            final_tableau = numpy.delete(final_tableau, artificial_indices, axis=1)
+            real_vars = []
+            for name in var_names:
+                if name.startswith('a') or name.startswith('x'):
+                    pass
+                else:
+                    Finalobjective.append(0)
+            for name in var_names:
+                if name.startswith('a'):
+                    pass
+                else:
+                    real_vars.append(name)
+            final_tableau[0] = Finalobjective
+            solution, basic_vars  = Secondarysimplex(final_tableau[0],final_tableau[1:],basic_vars,real_vars  , objective_type)
+            if isinstance(basic_vars,str):
+                if isinstance(solution,numpy.ndarray):
+                    solution = solution.tolist()
+                if isinstance(solution,list):
+                    new_solution = []
+                    for item in solution:
+                        if isinstance(item, numpy.ndarray):
+                            new_solution.append(item.tolist())
+                        else:
+                            new_solution.append(item)
+                    solution = new_solution
+                return JsonResponse({
+                    "steps" : solution,
+                    "Error" : "unbounded"
+                })
+            else:
+                if isinstance(solution,numpy.ndarray):
+                    solution = solution.tolist()
+                if isinstance(solution,list):
+                    new_solution = []
+                    for item in solution:
+                        if isinstance(item, numpy.ndarray):
+                            new_solution.append(item.tolist())
+                        else:
+                            new_solution.append(item)
+                    solution = new_solution
+                if isinstance(basic_vars, numpy.ndarray):
+                    basic_vars = basic_vars.tolist()
+                return JsonResponse({
+                    "steps" : solution,
+                    "basic_Vars" : basic_vars
+                })
+
+
     

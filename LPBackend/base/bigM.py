@@ -84,7 +84,6 @@ def simplex(objective, constraints, var_names,M):
         tableau.append(constraint)
     print(tableau)
     tableau = np.array(tableau,dtype=float)
-    # exit()
     steps.append(np.copy(tableau))
     i= 0
     # Pivot Row Identification Fix
@@ -98,7 +97,7 @@ def simplex(objective, constraints, var_names,M):
         valid_ratios = np.where(ratios > 0, ratios, np.inf)
         if np.all(valid_ratios == np.inf):
             print("Unbounded")
-            exit()
+            return steps, "unbounded"
         pivotRow = np.argmin(valid_ratios) + 1  # Adjust for offset
 
         # Handle artificial variable removal

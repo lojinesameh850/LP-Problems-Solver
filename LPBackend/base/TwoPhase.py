@@ -91,7 +91,7 @@ def TwoPhasesimplex(objective , constraints , var_names , M=1, unrestricted_vars
         valid_ratios = np.where(ratios > 0, ratios, np.inf)
         if np.all(valid_ratios == np.inf):
             print("Unbounded")
-            exit()
+            return steps , "unbounded" , None
         pivotRow = np.argmin(valid_ratios) + 1  # Adjust for offset
 
         # Handle artificial variable removal
@@ -157,7 +157,7 @@ def Secondarysimplex(objective, constraints, basic_vars,var_names,objective_type
         valid_ratios = np.where(ratios > 0, ratios, np.inf)
         if np.all(valid_ratios == np.inf):
             print("Unbounded")
-            exit()
+            return steps , "unbounded"
         pivotRow = np.argmin(valid_ratios) + 1  # Adjust for offset
 
         # Handle artificial variable removal
@@ -179,37 +179,37 @@ def Secondarysimplex(objective, constraints, basic_vars,var_names,objective_type
 
         f.write(str(steps))
     return steps, basic_vars
-Finalobjective = [5,-4,6,-8]
-unrestricted_vars = [0,1]
-constraints = [[1,2,2,4,'<=',40],[2,-1,1,2,'<=',8],[4,-2,1,-1,'<=',10]]
-constraints, objective, var_names = formulateTwoPhase(constraints,unrestricted_vars.copy())
-print(unrestricted_vars)
-for i in unrestricted_vars:
-        print(f'i = {i}')
-        Finalobjective[i] = Finalobjective[i] * -1
-        print(Finalobjective[i])
-        Finalobjective.insert(i, -1 * Finalobjective[i])
-        for j in range(0,len(unrestricted_vars)):
-            unrestricted_vars[j] += 1
-steps, basic_vars , var_names = TwoPhasesimplex(objective, constraints, var_names)
-final_tableau = steps[-1]
-artificial_indices = [i for i, name in enumerate(var_names) if name.startswith('a')]
-final_tableau = np.delete(final_tableau, artificial_indices, axis=1)
-real_vars = []
-for name in var_names:
-    if name.startswith('a') or name.startswith('x'):
-        pass
-    else:
-        Finalobjective.append(0)
-for name in var_names:
-    if name.startswith('a'):
-        pass
-    else:
-        real_vars.append(name)
-final_tableau[0] = Finalobjective
-objective_type = 'max'
-solution, basic_vars  = Secondarysimplex(final_tableau[0],final_tableau[1:],basic_vars,real_vars  , objective_type)
-print(solution[-1])
-print(solution[-1][0][-1])
-for var,val in zip(basic_vars, solution[-1][1:]):
-    print(f'{var} = {val[-1]}')
+# Finalobjective = [5,-4,6,-8]
+# unrestricted_vars = [0,1]
+# constraints = [[1,2,2,4,'<=',40],[2,-1,1,2,'<=',8],[4,-2,1,-1,'<=',10]]
+# constraints, objective, var_names = formulateTwoPhase(constraints,unrestricted_vars.copy())
+# print(unrestricted_vars)
+# for i in unrestricted_vars:
+#         print(f'i = {i}')
+#         Finalobjective[i] = Finalobjective[i] * -1
+#         print(Finalobjective[i])
+#         Finalobjective.insert(i, -1 * Finalobjective[i])
+#         for j in range(0,len(unrestricted_vars)):
+#             unrestricted_vars[j] += 1
+# steps, basic_vars , var_names = TwoPhasesimplex(objective, constraints, var_names)
+# final_tableau = steps[-1]
+# artificial_indices = [i for i, name in enumerate(var_names) if name.startswith('a')]
+# final_tableau = np.delete(final_tableau, artificial_indices, axis=1)
+# real_vars = []
+# for name in var_names:
+#     if name.startswith('a') or name.startswith('x'):
+#         pass
+#     else:
+#         Finalobjective.append(0)
+# for name in var_names:
+#     if name.startswith('a'):
+#         pass
+#     else:
+#         real_vars.append(name)
+# final_tableau[0] = Finalobjective
+# objective_type = 'max'
+# solution, basic_vars  = Secondarysimplex(final_tableau[0],final_tableau[1:],basic_vars,real_vars  , objective_type)
+# print(solution[-1])
+# print(solution[-1][0][-1])
+# for var,val in zip(basic_vars, solution[-1][1:]):
+#     print(f'{var} = {val[-1]}')
