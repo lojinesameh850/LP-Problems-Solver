@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Textarea, Button } from "@mui/joy";
 import { FaLessThanEqual, FaGreaterThanEqual, FaEquals } from "react-icons/fa6";
-import { Select, MenuItem } from "@mui/material";
+import { Select, MenuItem, Checkbox, FormControlLabel } from "@mui/material";
 
 function OthersForm() {
   const [numVars, setNumVars] = useState(2);
@@ -12,6 +12,7 @@ function OthersForm() {
   const [types, setTypes] = useState([]);
   const [RHS, setRHS] = useState([]);
   const [method, setMethod] = useState("simplex");
+  const [ursVars, setUrsVars] = useState([]);
 
   const handleGenerate = () => {
     setObjecFunc(Array.from({ length: numVars }, () => '0'));
@@ -33,6 +34,14 @@ function OthersForm() {
 
   const askForMethod = types.some(type => type === ">=" || type === "=");
 
+  const handleCheckboxChange = (index) => {
+    setUrsVars((prev) => 
+      prev.includes(index ) 
+        ? prev.filter(i => i !== index ) 
+        : [...prev, index] 
+    );
+  };
+
   const handleSolve = async () => {
     const data = {
       objecFunc: objecFunc,
@@ -40,7 +49,8 @@ function OthersForm() {
       RHS: RHS,
       types: types,
       priority: null,
-      method: method
+      method: method,
+      ursVars: ursVars
     };
   
     try {
@@ -158,6 +168,24 @@ function OthersForm() {
               />
             </div>
           ))}
+           {/* Unrestricted Variables */}
+            <div>
+              <h3>Select Unrestricted Variables:</h3>
+              <div>
+                {Array.from({ length: numVars }).map((_, index) => (
+                  <FormControlLabel
+                    key={index}
+                    control={
+                      <Checkbox
+                        checked={ursVars.includes(index)}
+                        onChange={() => handleCheckboxChange(index)}
+                      />
+                    }
+                    label={`X${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
           </>
         )}
       </div>
@@ -170,6 +198,9 @@ function OthersForm() {
           </Select>
       </>
     )}
+
+   
+
       {matrix.length > 0 && (
       <Link to="/home/solution" variant="contained" color="primary" onClick={handleSolve}><h3>Solve</h3></Link>
       )}

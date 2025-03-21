@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { Textarea, Option, Button } from "@mui/joy";
 import { FaLessThanEqual, FaGreaterThanEqual, FaEquals } from "react-icons/fa6";
-import { Select, MenuItem } from "@mui/material";
+import { Select, MenuItem, Checkbox, FormControlLabel} from "@mui/material";
 
 function GoalForm() {
     const [numPrio, setNumPrio] = useState(2);
@@ -14,6 +14,8 @@ function GoalForm() {
     const [RHS, setRHS] = useState([]);
     const [priority, setPriority] = useState([]);
     const [method, setMethod] = useState("goal");
+    const [ursVars, setUrsVars] = useState([]);
+  
   
     const handleGenerate = () => {
       setObjecFunc(Array.from({ length: numVars }, () => '0'));
@@ -39,6 +41,14 @@ function GoalForm() {
       );
       setMatrix(newMatrix);
     };
+
+    const handleCheckboxChange = (index) => {
+      setUrsVars((prev) => 
+        prev.includes(index - 1) 
+          ? prev.filter(i => i !== index - 1) 
+          : [...prev, index - 1] 
+      );
+    };
   
     const handleSolve = async () => {
       const data = {
@@ -48,7 +58,8 @@ function GoalForm() {
         RHS: RHS,
         types: types,
         priority: priority,
-        method: method
+        method: method,
+        ursVars: ursVars
       };
     
       try {
@@ -216,6 +227,24 @@ function GoalForm() {
               
             </div>
           ))}
+          {/* Unrestricted Variables */}
+          <div>
+              <h3>Select Unrestricted Variables:</h3>
+              <div>
+                {Array.from({ length: numVars }).map((_, index) => (
+                  <FormControlLabel
+                    key={index}
+                    control={
+                      <Checkbox
+                        checked={ursVars.includes(index)}
+                        onChange={() => handleCheckboxChange(index + 1)}
+                      />
+                    }
+                    label={`X${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
           </>
         )}
         {matrix.length > 0 && (
