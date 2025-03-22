@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { Textarea, Option, Button } from "@mui/joy";
-import { FaLessThanEqual, FaGreaterThanEqual, FaEquals } from "react-icons/fa6";
-import { Select, MenuItem, Checkbox, FormControlLabel} from "@mui/material";
+
+import { Textarea, Button, Select, Option, Checkbox } from "@mui/joy";
+import { FormControlLabel } from "@mui/material";
 
 function GoalForm() {
     const [numPrio, setNumPrio] = useState(2);
@@ -79,177 +79,191 @@ function GoalForm() {
     };
   
     return (
-      <div className="flex flex-col gap-4 p-4">
-  
-        {/* Objective Functions*/}
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg font-semibold">Number of Priority Levels</h1>
-          <Textarea
-            type="number"
-            variant="outlined"
-            sx={{ width: "50px", height: "10px" }}
-            maxRows={1}
-            value={numPrio}
-            onChange={(e) => setNumPrio(Number(e.target.value))}
-          />
-        </div>
-  
-        {/* Decision Variables */}
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg font-semibold">Number of Decision Variables</h1>
-          <Textarea
-            type="number"
-            variant="outlined"
-            sx={{ width: "50px", height: "10px" }}
-            maxRows={1}
-            value={numVars}
-            onChange={(e) => setNumVars(Number(e.target.value))}
-          />
-        </div>
-  
-        {/* Constraints */}
-        <div className="flex items-center gap-4">
-          <h2 className="text-lg font-semibold">Number of Constraints</h2>
-          <Textarea
-            type="number"
-            variant="outlined"
-            sx={{ width: "50px", height: "10px" }}
-            maxRows={1}
-            value={numConstraints}
-            onChange={(e) => setNumConstraints(Number(e.target.value))}
-          />
-        </div> 
-        
-  
-        {/* Objective */}
-        <div className="flex items-center gap-4">
-          <h3 className="text-lg font-semibold">Objective</h3>
-          <Select defaultValue="min" onChange={handleChange} sx={{ width: "150px", height: "35px" }}>
-            <MenuItem value="min">Minimize</MenuItem>
-            <MenuItem value="max">Maximize</MenuItem>
-          </Select>
-        </div>
-  
-        <div>
-          <Button variant="contained" color="primary" onClick={handleGenerate}>
-            Generate Model
-          </Button>
-        </div>
-  
-        
-        {matrix.length > 0 && (
-          <>
-          <h3>Objective Function: </h3>
-            {/* {objecMatrix.map((row, rowIndex) => (
-              <div key={rowIndex} style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-                <p>Z = </p>
-                {row.map((_, colIndex) => (
-                  <Textarea
-                  key={colIndex}
-                  size="small"
-                  variant="outlined"
-                  placeholder={`X${colIndex + 1}`}
-                  sx={{ width: "60px" }}
-                />
-                ))}
-              </div>
-            ))} */}
-  
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <p>Z =</p>
-              {objecFunc.map((_, index) => (
-                <Textarea
-                  key={index}
-                  size="small"
-                  variant="outlined"
-                  placeholder={`X${index + 1}`}
-                  sx={{ width: "60px" }}
-                />
-              ))}
-            </div>
-            {numPrio > 0 && (
-              <>
-            <h3>Priority Levels: </h3>
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              
-              {priority.map((_, index) => (
-                <>
-                <p>Priority X{index + 1}:</p>
-                <Textarea
-                  key={index}
-                  size="small"
-                  variant="outlined"
-                  placeholder={`X${index + 1}`}
-                  sx={{ width: "60px" }}
-                />
-                </>
-              ))}
-            </div>
-            </>
-            )}
-  
-          <h3>Constraints: </h3>
-          {matrix.map((row, rowIndex) => (
-            <div key={rowIndex} style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-              {row.map((_, colIndex) => (
-                <Textarea
-                  key={colIndex}
-                  size="small"
-                  variant="outlined"
-                  placeholder={`X${colIndex + 1}`}
-                  sx={{ width: "60px" }}
-                  onChange={(e) => handleChange(rowIndex, colIndex, e.target.value)}
-                />
-              ))}
-              <div className="flex items-center gap-4">
-                <Select placeholder="Type" defaultValue="<="  value={types[rowIndex] || "<="}  
-                onChange={(e) => {
-                  const newTypes = [...types];
-                  newTypes[rowIndex] = e.target.value;
-                  setTypes(newTypes);
-                }} sx={{ width: "80px", height: "auto" }}>
-                  <MenuItem value='<='><FaLessThanEqual /></MenuItem>
-                  <MenuItem value='>='><FaGreaterThanEqual /></MenuItem>
-                  <MenuItem value='='><FaEquals /></MenuItem>
-                </Select>
-              </div>
+      <div style={{ backgroundColor: "#3A404C", height: "100%", width: "100%", color: "#ffffff", padding: "15px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+
+        {/* Input taking */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+
+          {/* Take number of decision variables from user */}
+          <div style={{ display: "flex", gap: "10px", marginTop: "15px", flexWrap: "wrap", justifyContent: "center" }}>
+            <h2>Enter number of Decision Variables</h2>
               <Textarea
-                size="small"
-                variant="outlined"
-                placeholder="RHS"
-                sx={{ width: "60px" }}
-                onChange={(e) => {
-                  const newRHS = [...RHS];
-                  newRHS[rowIndex] = e.target.value;
-                  setRHS(newRHS);
-                }}
+              type="number"
+              variant="soft"
+              sx={{ width: "50px", height: "10px" }}
+              maxRows={1}
+              value={numVars}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+                setNumVars(value);
+                setNumPrio(value);
+              }}
               />
-              
+          </div>
+
+          {/* Take number of constraints from user */}
+          <div style={{ display: "flex", gap: "10px", marginTop: "15px", flexWrap: "wrap", justifyContent: "center" }}>
+            <h2>Enter number of Constraints</h2>
+              <Textarea
+                type="number"
+                variant="soft"
+                sx={{ width: "50px", height: "10px" }}
+                maxRows={1}
+                value={numConstraints}
+                onChange={(e) => setNumConstraints(Number(e.target.value))}
+              />
+          </div>
+        
+        </div>
+
+        {/* Model generation */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+  
+          {/* Button triggers model creation on click */}
+          <div style={{ marginTop: "15px", marginBottom: "15px", flexWrap: "wrap", justifyContent: "center" }}>
+            <Button sx={{
+                backgroundColor: "#EC407A",
+                color: "#ffffff",
+                "&:hover": {
+                  backgroundColor: "#D12366",
+                },
+                "&:active": {
+                  backgroundColor: "#B01F5D",
+                },
+              }} variant="solid" onClick={handleGenerate}>
+              Generate Model
+            </Button>
+          </div>
+        
+          {/* Model is generated according to input taken so far */}
+          {matrix.length > 0 && (
+            <>
+
+            {/* Take objective input from user */}
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "15px", justifyContent: "center" }}>
+              <h2>Optimization direction</h2>
+                <Select defaultValue="min" onChange={handleChange} sx={{ width: "130px", height: "35px" }}>
+                  <Option value="min">Minimize</Option>
+                  <Option value="max">Maximize</Option>
+                </Select>
             </div>
-          ))}
-          {/* Unrestricted Variables */}
-          <div>
-              <h3>Select Unrestricted Variables:</h3>
-              <div>
-                {Array.from({ length: numVars }).map((_, index) => (
-                  <FormControlLabel
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "15px", justifyContent: "center" }}>
+              <h2>Objective function</h2>
+                <p>Z =</p>
+                {objecFunc.map((_, index) => (
+                  <Textarea
                     key={index}
-                    control={
-                      <Checkbox
-                        checked={ursVars.includes(index)}
-                        onChange={() => handleCheckboxChange(index + 1)}
-                      />
-                    }
-                    label={`X${index + 1}`}
+                    placeholder={`X${index + 1}`}
+                    type="number"
+                    variant="soft"
+                    sx={{ width: "80px", height: "10px" }}
+                    maxRows={1}
                   />
                 ))}
-              </div>
             </div>
-          </>
-        )}
-        {matrix.length > 0 && (
-        <Link to="/home/solution" variant="contained" color="primary" onClick={handleSolve}><h3>Solve</h3></Link>
-        )}
+    
+            {/* Draw matrix for user to provide input */}
+            <div style={{ gap: "10px", marginTop: "15px", justifyContent: "center" }}>
+
+              <h2 style={{ marginBottom: "10px", justifyContent: "center" }}>Please fill in your constraints </h2>
+              {matrix.map((row, rowIndex) => (
+                <div key={rowIndex} style={{ display: "flex", gap: "10px", marginTop: "8px", justifyContent: "center" }}>
+
+                  {row.map((_, colIndex) => (
+                    <Textarea
+                      key={colIndex}
+                      placeholder={`X${colIndex + 1}`}
+                      type="number"
+                      variant="soft"
+                      sx={{ width: "80px", height: "10px" }}
+                      maxRows={1}
+                      onChange={(e) => handleChange(rowIndex, colIndex, e.target.value)}
+                    />
+                  ))}
+
+                  {/* Choose constraint type */}
+                  <Select
+                    sx={{ height: "35px", width: "70px", fontSize: "20px" }}
+                    placeholder="Type"
+                    value={types[rowIndex] || "<="} 
+                    onChange={(event, newValue) => {
+                      const newTypes = [...types];
+                      newTypes[rowIndex] = newValue; // Ensure newValue is assigned correctly
+                      setTypes(newTypes);
+                    }}
+                  >
+                    <Option sx={{ fontSize: "20px" }} value="<=">
+                      {" ≤ "}
+                    </Option>
+                    <Option sx={{ fontSize: "20px" }} value=">=">
+                      {" ≥ "}
+                    </Option>
+                    <Option sx={{ fontSize: "20px" }} value="=">
+                      {" = "}
+                    </Option>
+                  </Select>
+
+                  <Textarea
+                    placeholder="RHS"
+                    type="number"
+                    variant="soft"
+                    sx={{ width: "80px", height: "10px" }}
+                    maxRows={1}
+                    onChange={(e) => {
+                      const newRHS = [...RHS];
+                      newRHS[rowIndex] = e.target.value;
+                      setRHS(newRHS);
+                    }}
+                  />
+
+                </div>
+              ))}
+              
+            </div>
+
+            {/* Unrestricted Variables */}
+              <div style={{ display: "flex", gap: "10px", marginTop: "15px", marginBottom: "15px", justifyContent: "center" }}>
+                <h2 style={{ marginRight: "10px" }}>Unrestricted Variables</h2>
+                  {Array.from({ length: numVars }, (_, index) => (
+                    <FormControlLabel style={{ display: "flex", gap: "10px" }}
+                      key={index}
+                      control={
+                        <Checkbox
+                          color="primary"
+                          checked={ursVars.includes(index)}
+                          onChange={() => handleCheckboxChange(index + 1)}
+                        />
+                      }
+                      label={`X${index + 1}`}
+                    />
+                  ))}
+              </div>
+            </>
+          )}
+
+        </div>
+
+        {/* Model solving */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          {/* Button triggers model solving on click */}
+          {matrix.length > 0 && (
+            <div style={{ display: "flex", gap: "10px", marginTop: "15px",  marginBottom: "15px", justifyContent: "center" }}>
+              <Button sx={{
+                  backgroundColor: "#EC407A",
+                  color: "#ffffff",
+                  "&:hover": {
+                    backgroundColor: "#D12366",
+                  },
+                  "&:active": {
+                    backgroundColor: "#B01F5D",
+                  },
+                }} variant="solid" onClick={handleSolve}>
+                Solve
+              </Button>
+            </div>
+          )}
+        </div>
+
       </div>
     );
 };
