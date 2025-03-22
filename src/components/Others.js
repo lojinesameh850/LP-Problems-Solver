@@ -12,6 +12,7 @@ function OthersForm() {
   const [types, setTypes] = useState([]);
   const [RHS, setRHS] = useState([]);
   const [method, setMethod] = useState("simplex");
+  const [checkBox, setCheckBox] = useState([]);
   const [ursVars, setUrsVars] = useState([]);
 
   const handleGenerate = () => {
@@ -23,6 +24,7 @@ function OthersForm() {
     );
     setRHS(Array.from({ length: numConstraints }, () => '0'));
     setTypes(Array.from({ length: numConstraints }, () => "<="));
+    setCheckBox(Array.from({ length: numVars }, (_, index) => index));
   };
 
   const handleChange = (row, col, value) => {
@@ -213,7 +215,7 @@ function OthersForm() {
           {/* Unrestricted Variables */}
             <div style={{ display: "flex", gap: "10px", marginTop: "15px", marginBottom: "15px", justifyContent: "center" }}>
               <h2 style={{ marginRight: "10px" }}>Unrestricted Variables</h2>
-                {Array.from({ length: numVars }).map((_, index) => (
+                {checkBox.map((_, index) => (
                   <FormControlLabel style={{ display: "flex", gap: "10px" }}
                     key={index}
                     control={

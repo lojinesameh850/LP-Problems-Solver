@@ -14,10 +14,10 @@ const LinearProgrammingModel = () => {
           <Link to="/home">Home</Link>
         </nav> */}
         <Routes>
-          <Route path="/home" element={<InitialPage />} />
-          <Route path="/home/others" element={<OthersForm />} />
-          <Route path="/home/goal" element={<GoalForm />} />
-          <Route path="/home/solution" element={<Solution/>} />
+          {/* <Route path="/" element={<InitialPage />} /> */}
+          {/* <Route path="/home/others" element={<OthersForm />} />
+          <Route path="/home/goal" element={<GoalForm />} /> */}
+          <Route path="/solution" element={<Solution/>} />
         </Routes>
     </Router>
  );
