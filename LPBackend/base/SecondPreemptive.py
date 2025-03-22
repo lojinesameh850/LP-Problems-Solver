@@ -1,6 +1,6 @@
 import time
 import numpy as np
-np.set_printoptions(1,suppress=True)
+np.set_printoptions(2,suppress=True)
 def FormulatePreemptive(goals,unrestricted = []):
     satisfier = []
     var_names = []
@@ -55,7 +55,7 @@ def FormulatePreemptive(goals,unrestricted = []):
 #             for j, objective in enumerate(objectives):
 #                 objectives[j].insert(-2,0)
 #         elif 
-def solvePreemtpive(goals,var_names,satisfier):
+def solvePreemtpive(goals,var_names,satisfier,num_constraints = 0):
     list = []
     objectives = []
     satisfaction = []
@@ -79,36 +79,41 @@ def solvePreemtpive(goals,var_names,satisfier):
     for i, objective in enumerate(objectives):
         for j, name in enumerate(var_names):
             if name.startswith('s') and objective[j] != 0:
-                objectives[i] += goals[i]  # Subtract instead of adding
+                objectives[i] += goals[i] 
     for i,objective in enumerate(objectives):
         while np.any(objective[:-1] > 0):
             list.append(np.vstack([objectives,goals]).tolist())
-            time.sleep(1)
             print(var_names)
+            print(basic_vars)
             print(objectives)
             print(goals)
             pivotCol = np.argmax(objective[:-1])
             if i!=0:
-                print(goals[:i,pivotCol])
+                print(objectives[:i,pivotCol])
                 if np.any(objectives[:i, pivotCol] != 0):
-                    print("goal conflicts with a higher priority goal")
+                    print(f"goal {i+1} conflicts with a higher priority goal")
+                    if i < num_constraints:
+                        return basic_vars, var_names,list , False
                     break
             ratios = goals[:,-1] / goals[:,pivotCol]
             valid_ratios = np.where(ratios > 0, ratios, np.inf)
             if np.all(valid_ratios == np.inf):
                 print("unbounded")
+                if i  < num_constraints:
+                    return basic_vars , var_names , list , False
                 break
             pivotRow = np.argmin(valid_ratios)
             entering_var = var_names[pivotCol]
+            print(entering_var)
             basic_vars[pivotRow] = entering_var
             goals[pivotRow] /= goals[pivotRow,pivotCol]
             pivotRow_values = goals[pivotRow , :]
-            for i in range(len(objectives)):
-                objectives[i] -= objectives[i,pivotCol] * pivotRow_values
-            for i in range(len(goals)):
-                if i!=pivotRow:
-                    goals[i] -= goals[i,pivotCol] * pivotRow_values
-    return basic_vars, var_names,list
+            for k in range(len(objectives)):
+                objectives[k] = goals[pivotRow] *-1* objectives[k,pivotCol] / goals[pivotRow,pivotCol] + objectives[k]
+            for k in range(len(goals)):
+                if k!=pivotRow:
+                    goals[k] = goals[pivotRow] *-1* goals[k,pivotCol] / goals[pivotRow,pivotCol] + goals[k]
+    return basic_vars, var_names,list , True
             
                 
 

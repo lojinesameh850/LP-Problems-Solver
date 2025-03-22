@@ -145,13 +145,15 @@ class Solver(View):
         elif operation == 4:
             goals = data.get("goals")
             unrestricted_vars = data.get("unrestricted_vars")
+            num_constraints = data.get("num_constraints")
             goals , var_names , satisfier = FormulatePreemptive(goals,unrestricted_vars.copy())
-            basic_vars , var_names , list = solvePreemtpive(goals,var_names,satisfier)
+            basic_vars , var_names , list , feasible = solvePreemtpive(goals,var_names,satisfier,num_constraints)
             return JsonResponse(
                 {
                     "steps" : list,
                     "var_names" : var_names,
-                    "basic_vars" : basic_vars
+                    "basic_vars" : basic_vars,
+                    "feasible" : feasible
                 }
             )
             
