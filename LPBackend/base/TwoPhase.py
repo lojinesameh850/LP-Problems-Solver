@@ -1,4 +1,3 @@
-from time import sleep
 import numpy as np
 np.set_printoptions(precision=2, suppress=True)
 def formulateTwoPhase(constraints,unrestricted_vars=[]):
@@ -83,15 +82,13 @@ def TwoPhasesimplex(objective , constraints , var_names , M=1, unrestricted_vars
     # Pivot Row Identification Fix
     while np.any(tableau[0,:-1] < 0):
         print(tableau)
-        sleep(1)
         pivotCol = np.argmin(tableau[0, :-1])
-
         # Correct ratio calculation for unrestricted variables
         ratios = tableau[1:, -1] / tableau[1:, pivotCol]
         valid_ratios = np.where(ratios > 0, ratios, np.inf)
         if np.all(valid_ratios == np.inf):
             print("Unbounded")
-            return steps , "unbounded" , None
+            return steps , basic_vars , var_names,False
         pivotRow = np.argmin(valid_ratios) + 1  # Adjust for offset
 
         # Handle artificial variable removal
@@ -121,7 +118,7 @@ def TwoPhasesimplex(objective , constraints , var_names , M=1, unrestricted_vars
         f.write(str(var_names) + '\n')
 
         f.write(str(steps))
-    return steps, basic_vars , var_names
+    return steps, basic_vars , var_names , True
 def Secondarysimplex(objective, constraints, basic_vars,var_names,objective_type='max'):
     if objective_type == 'max':
         objective = -objective
@@ -150,14 +147,13 @@ def Secondarysimplex(objective, constraints, basic_vars,var_names,objective_type
                         tableau[0] = tableau[pivotRow] * -1*tableau[0][i]/tableau[pivotRow][i] + tableau[0]
                         print(tableau)
         print(tableau)
-        sleep(1)
         pivotCol = np.argmin(tableau[0, :-1])
         # Correct ratio calculation for unrestricted variables
         ratios = tableau[1:, -1] / tableau[1:, pivotCol]
         valid_ratios = np.where(ratios > 0, ratios, np.inf)
         if np.all(valid_ratios == np.inf):
             print("Unbounded")
-            return steps , "unbounded"
+            return steps , basic_vars , False
         pivotRow = np.argmin(valid_ratios) + 1  # Adjust for offset
 
         # Handle artificial variable removal
@@ -178,7 +174,7 @@ def Secondarysimplex(objective, constraints, basic_vars,var_names,objective_type
         f.write(str(var_names) + '\n')
 
         f.write(str(steps))
-    return steps, basic_vars
+    return steps, basic_vars , True
 # Finalobjective = [5,-4,6,-8]
 # unrestricted_vars = [0,1]
 # constraints = [[1,2,2,4,'<=',40],[2,-1,1,2,'<=',8],[4,-2,1,-1,'<=',10]]

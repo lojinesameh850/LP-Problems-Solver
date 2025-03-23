@@ -1,4 +1,3 @@
-from time import sleep, time
 from traceback import print_tb
 import numpy as np
 np.set_printoptions(precision=2, suppress=True)
@@ -89,7 +88,6 @@ def simplex(objective, constraints, var_names,M):
     # Pivot Row Identification Fix
     while np.any(tableau[0,:-1] < 0):
         print(tableau)
-        sleep(1)
         pivotCol = np.argmin(tableau[0, :-1])
 
         # Correct ratio calculation for unrestricted variables
@@ -97,7 +95,7 @@ def simplex(objective, constraints, var_names,M):
         valid_ratios = np.where(ratios > 0, ratios, np.inf)
         if np.all(valid_ratios == np.inf):
             print("Unbounded")
-            return steps, "unbounded"
+            return steps, basic_vars , False
         pivotRow = np.argmin(valid_ratios) + 1  # Adjust for offset
 
         # Handle artificial variable removal
@@ -128,7 +126,7 @@ def simplex(objective, constraints, var_names,M):
 
         f.write(str(steps))
     print(basic_vars)
-    return steps, basic_vars
+    return steps, basic_vars , True
 if __name__ == '__main__':
     objective = [5,-4,6,-8]
     objective_type = 'max'

@@ -24,62 +24,43 @@ class Solver(View):
             objective_type = data.get('operation_type')
             unrestricted_vars = data.get('unrestricted_vars')
             constraints , objective , var_names , M = formulateConstraints(objective,objective_type,constraints,unrestricted_vars.copy())
-            steps , basic_vars = simplex(objective,constraints,var_names,M)
+            steps , basic_vars , feasible= simplex(objective,constraints,var_names,M)
             print(type(steps))
             print(type(basic_vars))
-            if isinstance(basic_vars, str):
-                print("here")
-                if isinstance(steps, numpy.ndarray):
-                    steps = steps.tolist()
-                if isinstance(basic_vars, numpy.ndarray):
-                    basic_vars = basic_vars.tolist()
-                #if steps contains nested ndarrays
-                if isinstance(steps,list):
-                    new_steps = []
-                    for item in steps:
-                        if isinstance(item, numpy.ndarray):
-                            new_steps.append(item.tolist())
-                        else:
-                            new_steps.append(item)
-                    steps = new_steps
-                return JsonResponse({
-                    "steps": steps,
-                    "Error": basic_vars
-                })
-            else:
-                # Convert NumPy arrays to lists
-                if isinstance(steps, numpy.ndarray):
-                    steps = steps.tolist()
-                if isinstance(basic_vars, numpy.ndarray):
-                    basic_vars = basic_vars.tolist()
-                #if steps contains nested ndarrays
-                if isinstance(steps,list):
-                    new_steps = []
-                    for item in steps:
-                        if isinstance(item, numpy.ndarray):
-                            new_steps.append(item.tolist())
-                        else:
-                            new_steps.append(item)
-                    steps = new_steps
-
-                return JsonResponse({
-                    "steps": steps,
-                    "basic_vars": basic_vars
-                })
+            # Convert NumPy arrays to lists
+            if isinstance(steps, numpy.ndarray):
+                steps = steps.tolist()
+            if isinstance(basic_vars, numpy.ndarray):
+                basic_vars = basic_vars.tolist()
+            #if steps contains nested ndarrays
+            if isinstance(steps,list):
+                new_steps = []
+                for item in steps:
+                    if isinstance(item, numpy.ndarray):
+                        new_steps.append(item.tolist())
+                    else:
+                        new_steps.append(item)
+                steps = new_steps
+            return JsonResponse({
+                "steps": steps,
+                "basic_vars": basic_vars,
+                "feasible" : feasible
+            })
         elif operation == 3:
             objective = data.get('objective')
             constraints = data.get('constraints')
             objective_type = data.get('operation_type')
             unrestricted_vars = data.get('unrestricted_vars')
             Finalobjective = objective
-            constraints , objective , var_names = formulateTwoPhase(constraints,unrestricted_vars.copy())
+            constraints , objective , var_names ,feasible= formulateTwoPhase(constraints,unrestricted_vars.copy())
+                
             for i in unrestricted_vars:
                 Finalobjective[i] = Finalobjective[i] * -1
                 Finalobjective.insert(i, -1 * Finalobjective[i])
                 for j in range(0,len(unrestricted_vars)):
                     unrestricted_vars[j] += 1
             steps , basic_vars , var_names = TwoPhasesimplex(objective,constraints,var_names)
-            if isinstance(basic_vars,str):
+            if not feasible: 
                 if isinstance(steps,numpy.ndarray):
                     steps = steps.tolist()
                 if isinstance(steps,list):
@@ -92,7 +73,9 @@ class Solver(View):
                     steps = new_steps
                 return JsonResponse({
                     "steps" : steps,
-                    "Error" : "unbounded"
+                    "var_names" : var_names,
+                    "basic_vars" :basic_vars,
+                    "feasible" : feasible
                 })
             final_tableau = steps[-1]
             artificial_indices = [i for i, name in enumerate(var_names) if name.startswith('a')]
@@ -109,48 +92,32 @@ class Solver(View):
                 else:
                     real_vars.append(name)
             final_tableau[0] = Finalobjective
-            solution, basic_vars  = Secondarysimplex(final_tableau[0],final_tableau[1:],basic_vars,real_vars  , objective_type)
-            if isinstance(basic_vars,str):
-                if isinstance(solution,numpy.ndarray):
-                    solution = solution.tolist()
-                if isinstance(solution,list):
-                    new_solution = []
-                    for item in solution:
-                        if isinstance(item, numpy.ndarray):
-                            new_solution.append(item.tolist())
-                        else:
-                            new_solution.append(item)
-                    solution = new_solution
-                return JsonResponse({
-                    "steps" : solution,
-                    "Error" : "unbounded"
-                })
-            else:
-                if isinstance(solution,numpy.ndarray):
-                    solution = solution.tolist()
-                if isinstance(solution,list):
-                    new_solution = []
-                    for item in solution:
-                        if isinstance(item, numpy.ndarray):
-                            new_solution.append(item.tolist())
-                        else:
-                            new_solution.append(item)
-                    solution = new_solution
-                if isinstance(basic_vars, numpy.ndarray):
-                    basic_vars = basic_vars.tolist()
-                return JsonResponse({
-                    "steps" : solution,
-                    "basic_Vars" : basic_vars
-                })
+            solution, basic_vars, feasible  = Secondarysimplex(final_tableau[0],final_tableau[1:],basic_vars,real_vars  , objective_type)
+            if isinstance(solution,numpy.ndarray):
+                solution = solution.tolist()
+            if isinstance(solution,list):
+                new_solution = []
+                for item in solution:
+                    if isinstance(item, numpy.ndarray):
+                        new_solution.append(item.tolist())
+                    else:
+                        new_solution.append(item)
+                solution = new_solution
+            return JsonResponse({
+                "steps" : solution,
+                "basic_vars" : basic_vars,
+                "var_names" : var_names,
+                "feasible" : feasible
+            })
         elif operation == 4:
             goals = data.get("goals")
             unrestricted_vars = data.get("unrestricted_vars")
             num_constraints = data.get("num_constraints")
             goals , var_names , satisfier = FormulatePreemptive(goals,unrestricted_vars.copy())
-            basic_vars , var_names , list , feasible = solvePreemtpive(goals,var_names,satisfier,num_constraints)
+            basic_vars , var_names , steps , feasible = solvePreemtpive(goals,var_names,satisfier,num_constraints)
             return JsonResponse(
                 {
-                    "steps" : list,
+                    "steps" : steps,
                     "var_names" : var_names,
                     "basic_vars" : basic_vars,
                     "feasible" : feasible
