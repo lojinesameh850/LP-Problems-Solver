@@ -112,7 +112,16 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Cross-Origin Resource Sharing
+# https://pypi.org/project/django-cors-headers/
 
+CORS_ALLOW_ALL_ORIGINS = True
+
+INSTALLED_APPS += [
+    'corsheaders',
+]
+
+MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 

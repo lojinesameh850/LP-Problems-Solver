@@ -80,13 +80,10 @@ def solvePreemtpive(goals,var_names,satisfier,num_constraints = 0):
         for j, name in enumerate(var_names):
             if name.startswith('s') and objective[j] != 0:
                 objectives[i] += goals[i] 
+    list.append(np.vstack([objectives,goals]).tolist())
     for i,objective in enumerate(objectives):
         while np.any(objective[:-1] > 0):
             list.append(np.vstack([objectives,goals]).tolist())
-            print(var_names)
-            print(basic_vars)
-            print(objectives)
-            print(goals)
             pivotCol = np.argmax(objective[:-1])
             if i!=0:
                 print(objectives[:i,pivotCol])

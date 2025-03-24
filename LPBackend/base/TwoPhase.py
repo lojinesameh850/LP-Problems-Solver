@@ -75,7 +75,7 @@ def TwoPhasesimplex(objective , constraints , var_names , M=1, unrestricted_vars
     steps = []
     tableau.append(objective)
     for constraint in constraints:
-        tableau.append(constraint )
+        tableau.append(constraint)
     tableau = np.array(tableau,dtype=float)
     steps.append(np.copy(tableau))
     i= 0
@@ -170,6 +170,8 @@ def Secondarysimplex(objective, constraints, basic_vars,var_names,objective_type
             if i != pivotRow:
                 tableau[i] -= tableau[i, pivotCol] * pivotRow_values
         steps.append(np.copy(tableau))
+        print(tableau)
+    print(steps)
     with open('outputFile.txt','w') as f:
         f.write(str(var_names) + '\n')
 

@@ -21,6 +21,7 @@ def formulateConstraints(objective, objective_type, constraints,unrestricted_var
     steps = []
     new_constraints = []
     if objective_type == 'max':
+        print("maxxxx")
         objective = [-1 * x for x in objective]
     else:
         M = -1 * M
@@ -128,12 +129,14 @@ def simplex(objective, constraints, var_names,M):
     print(basic_vars)
     return steps, basic_vars , True
 if __name__ == '__main__':
-    objective = [5,-4,6,-8]
+    objective = [1,2,1]
     objective_type = 'max'
-    constraints = [[1,2,2,4,'<=',40],[2,-1,1,2,'<=',8],[4,-2,1,-1,'<=',10]]
+    constraints = [[1,1,1,'=',7],[2,-5,1,'>=',10]]
     unrestricted_vars = []
     constraints, objective, var_names, M = formulateConstraints(objective, objective_type, constraints,unrestricted_vars.copy())
-    steps , basic_vars = simplex(objective, constraints, var_names,M)
+    print(constraints)
+    print(objective)
+    steps , basic_vars , feasible= simplex(objective, constraints, var_names,M)
     steps = np.array(steps)  # Add this before the loop
     print(steps[-1])
     print("Objective Value:", steps[-1, 0, -1])
